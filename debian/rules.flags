@@ -48,7 +48,7 @@ confflags_main = \
 	--enable-screensaver \
 	--enable-xdmcp \
 	--enable-xdm-auth-1 \
-	--enable-glx \
+	--disable-glx \
 	--enable-present \
 	--enable-xinerama \
 	--enable-xf86vidmode \

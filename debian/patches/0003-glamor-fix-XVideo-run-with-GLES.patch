@@ -1,0 +1,38 @@
+From 6b3cb1b293068b985beb0797e0c534ed49a32455 Mon Sep 17 00:00:00 2001
+From: Konstantin <ria.freelander@gmail.com>
+Date: Tue, 28 Jun 2022 12:28:39 +0300
+Subject: [PATCH 3/6] glamor: fix XVideo run with GLES
+
+For now, it sets .version=120, which prevents shader from compiling on ES.
+We just force version of shaders to be always 100 on ES, because we use
+only 120 shaders on ES anyway, and all shaders works.
+
+Signed-off-by: Konstantin Pugin <ria.freelander@gmail.com>
+
+Reviewed-by: Adam Jackson <ajax@redhat.com>
+Reviewed-by: Emma Anholt <emma@anholt.net>
+
+Signed-off-by: Icenowy Zheng <uwu@icenowy.me>
+---
+ glamor/glamor_program.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/glamor/glamor_program.c b/glamor/glamor_program.c
+index d8ddb4c77..1e5267cdd 100644
+--- a/glamor/glamor_program.c
++++ b/glamor/glamor_program.c
+@@ -281,6 +281,11 @@ glamor_build_program(ScreenPtr          screen,
+             gpu_shader4 = TRUE;
+         }
+     }
++    /* For now, fix shader version to GLES as 100. We will fall with 130 shaders
++     * in previous check due to forcibly set 120 glsl for GLES. But this patch
++     * makes xv shaders to work */
++    if(version && glamor_priv->is_gles)
++        version = 100;
+ 
+     vs_vars = vs_location_vars(locations);
+     fs_vars = fs_location_vars(locations);
+-- 
+2.39.1
+

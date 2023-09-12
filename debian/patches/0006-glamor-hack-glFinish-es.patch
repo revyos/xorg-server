@@ -1,0 +1,213 @@
+From 16afdb3faf700465bcdc9ee54d471a12ef6fdb7d Mon Sep 17 00:00:00 2001
+From: Icenowy Zheng <uwu@icenowy.me>
+Date: Tue, 9 May 2023 13:37:54 +0800
+Subject: [PATCH 6/6] glamor: hack: glFinish'es
+
+Signed-off-by: Icenowy Zheng <uwu@icenowy.me>
+---
+ glamor/glamor_composite_glyphs.c | 1 +
+ glamor/glamor_copy.c             | 1 +
+ glamor/glamor_dash.c             | 1 +
+ glamor/glamor_glyphblt.c         | 2 ++
+ glamor/glamor_gradient.c         | 2 ++
+ glamor/glamor_lines.c            | 1 +
+ glamor/glamor_points.c           | 1 +
+ glamor/glamor_rects.c            | 1 +
+ glamor/glamor_render.c           | 1 +
+ glamor/glamor_segs.c             | 1 +
+ glamor/glamor_spans.c            | 1 +
+ glamor/glamor_text.c             | 1 +
+ glamor/glamor_utils.h            | 6 ++++++
+ glamor/glamor_xv.c               | 1 +
+ 14 files changed, 21 insertions(+)
+
+diff --git a/glamor/glamor_composite_glyphs.c b/glamor/glamor_composite_glyphs.c
+index 147e3bb31..863888b80 100644
+--- a/glamor/glamor_composite_glyphs.c
++++ b/glamor/glamor_composite_glyphs.c
+@@ -280,6 +280,7 @@ glamor_glyphs_flush(CARD8 op, PicturePtr src, PicturePtr dst,
+         prog++;
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     glDisable(GL_SCISSOR_TEST);
+ 
+     if (glamor_glsl_has_ints(glamor_priv)) {
+diff --git a/glamor/glamor_copy.c b/glamor/glamor_copy.c
+index 1ab2be6c0..829328010 100644
+--- a/glamor/glamor_copy.c
++++ b/glamor/glamor_copy.c
+@@ -480,6 +480,7 @@ glamor_copy_fbo_fbo_draw(DrawablePtr src,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(dst_pixmap);
+     ret = TRUE;
+ 
+ bail_ctx:
+diff --git a/glamor/glamor_dash.c b/glamor/glamor_dash.c
+index b53ce5c50..460c0b919 100644
+--- a/glamor/glamor_dash.c
++++ b/glamor/glamor_dash.c
+@@ -227,6 +227,7 @@ glamor_dash_loop(DrawablePtr drawable, GCPtr gc, glamor_program *prog,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     glDisable(GL_SCISSOR_TEST);
+     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
+ }
+diff --git a/glamor/glamor_glyphblt.c b/glamor/glamor_glyphblt.c
+index 78315ea9b..5fea6d268 100644
+--- a/glamor/glamor_glyphblt.c
++++ b/glamor/glamor_glyphblt.c
+@@ -140,6 +140,7 @@ glamor_poly_glyph_blt_gl(DrawablePtr drawable, GCPtr gc,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     ret = TRUE;
+ 
+ bail:
+@@ -232,6 +233,7 @@ glamor_push_pixels_gl(GCPtr gc, PixmapPtr bitmap,
+         glDrawArrays(GL_POINTS, 0, num_points);
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     ret = TRUE;
+ 
+ bail:
+diff --git a/glamor/glamor_gradient.c b/glamor/glamor_gradient.c
+index 7e5d5cca9..6600fddae 100644
+--- a/glamor/glamor_gradient.c
++++ b/glamor/glamor_gradient.c
+@@ -1076,6 +1076,7 @@ glamor_generate_radial_gradient_picture(ScreenPtr screen,
+         free(stop_colors);
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
+     glDisableVertexAttribArray(GLAMOR_VERTEX_SOURCE);
+ 
+@@ -1419,6 +1420,7 @@ glamor_generate_linear_gradient_picture(ScreenPtr screen,
+         free(stop_colors);
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
+     glDisableVertexAttribArray(GLAMOR_VERTEX_SOURCE);
+ 
+diff --git a/glamor/glamor_lines.c b/glamor/glamor_lines.c
+index 5d95333fe..70fb14966 100644
+--- a/glamor/glamor_lines.c
++++ b/glamor/glamor_lines.c
+@@ -118,6 +118,7 @@ glamor_poly_lines_solid_gl(DrawablePtr drawable, GCPtr gc,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     ret = TRUE;
+ 
+ bail:
+diff --git a/glamor/glamor_points.c b/glamor/glamor_points.c
+index faf6f433b..568a04848 100644
+--- a/glamor/glamor_points.c
++++ b/glamor/glamor_points.c
+@@ -105,6 +105,7 @@ glamor_poly_point_gl(DrawablePtr drawable, GCPtr gc, int mode, int npt, DDXPoint
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     ret = TRUE;
+ 
+ bail:
+diff --git a/glamor/glamor_rects.c b/glamor/glamor_rects.c
+index 8cdad64e4..a802ba048 100644
+--- a/glamor/glamor_rects.c
++++ b/glamor/glamor_rects.c
+@@ -159,6 +159,7 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     ret = TRUE;
+ 
+ bail:
+diff --git a/glamor/glamor_render.c b/glamor/glamor_render.c
+index 25e0c927c..298959048 100644
+--- a/glamor/glamor_render.c
++++ b/glamor/glamor_render.c
+@@ -1303,6 +1303,7 @@ glamor_composite_with_shader(CARD8 op,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(dest_pixmap);
+     glDisable(GL_SCISSOR_TEST);
+ disable_va:
+     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
+diff --git a/glamor/glamor_segs.c b/glamor/glamor_segs.c
+index 4dfa6553b..d5039ae9a 100644
+--- a/glamor/glamor_segs.c
++++ b/glamor/glamor_segs.c
+@@ -110,6 +110,7 @@ glamor_poly_segment_solid_gl(DrawablePtr drawable, GCPtr gc,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     ret = TRUE;
+ 
+     glDisable(GL_SCISSOR_TEST);
+diff --git a/glamor/glamor_spans.c b/glamor/glamor_spans.c
+index 00a019c7b..1cd979e43 100644
+--- a/glamor/glamor_spans.c
++++ b/glamor/glamor_spans.c
+@@ -142,6 +142,7 @@ glamor_fill_spans_gl(DrawablePtr drawable,
+         }
+     }
+ 
++    glamor_finish_for_texture_drm(pixmap);
+     ret = TRUE;
+ 
+ bail:
+diff --git a/glamor/glamor_text.c b/glamor/glamor_text.c
+index cf165cad8..70c4c9ad4 100644
+--- a/glamor/glamor_text.c
++++ b/glamor/glamor_text.c
+@@ -209,6 +209,7 @@ glamor_text(DrawablePtr drawable, GCPtr gc,
+                 glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, nglyph);
+             }
+         }
++        glamor_finish_for_texture_drm(pixmap);
+         glDisable(GL_SCISSOR_TEST);
+     }
+ 
+diff --git a/glamor/glamor_utils.h b/glamor/glamor_utils.h
+index bee48d989..cbf2e5a3b 100644
+--- a/glamor/glamor_utils.h
++++ b/glamor/glamor_utils.h
+@@ -748,4 +748,10 @@ glamor_glsl_has_ints(glamor_screen_private *glamor_priv) {
+     return glamor_priv->glsl_version >= 130 || glamor_priv->use_gpu_shader4;
+ }
+ 
++static inline void glamor_finish_for_texture_drm(PixmapPtr pixmap) {
++    glamor_pixmap_private *pixmap_priv = glamor_get_pixmap_private(pixmap);
++    if (pixmap_priv->type == GLAMOR_TEXTURE_DRM) {
++        glFinish();
++    }
++}
+ #endif
+diff --git a/glamor/glamor_xv.c b/glamor/glamor_xv.c
+index 73e4d6f04..edd928fdd 100644
+--- a/glamor/glamor_xv.c
++++ b/glamor/glamor_xv.c
+@@ -465,6 +465,7 @@ glamor_xv_render(glamor_port_private *port_priv, int id)
+             glDrawArrays(GL_TRIANGLE_FAN, 0, 3);
+         }
+     }
++    glamor_finish_for_texture_drm(pixmap);
+     glDisable(GL_SCISSOR_TEST);
+ 
+     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
+-- 
+2.39.1
+
